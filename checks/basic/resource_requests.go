@@ -1,5 +1,5 @@
 /*
-Copyright 2022 DigitalOcean
+Copyright 2022 bizflycloud
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package basic
 import (
 	"fmt"
 
-	"github.com/digitalocean/clusterlint/checks"
-	"github.com/digitalocean/clusterlint/kube"
+	"github.com/bizflycloud/clusterlint/checks"
+	"github.com/bizflycloud/clusterlint/kube"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -66,16 +66,25 @@ func (r *resourceRequirementsCheck) Run(objects *kube.Objects) ([]checks.Diagnos
 // Adds a warning if the container does not use a fully qualified image name
 func (r *resourceRequirementsCheck) checkResourceRequirements(containers []corev1.Container, pod corev1.Pod) []checks.Diagnostic {
 	var diagnostics []checks.Diagnostic
+	bkeContainer := map[string]bool{
+		"bizflycloud-csi-plugin": true,
+		"kube-router": true,
+		"coredns": true,
+		"node-driver-registrar": true,
+		"install-cni": true,
+	}
 	for _, container := range containers {
 		if container.Resources.Size() == 0 {
-			d := checks.Diagnostic{
-				Severity: checks.Warning,
-				Message:  fmt.Sprintf("Set resource requests and limits for container `%s` to prevent resource contention", container.Name),
-				Kind:     checks.Pod,
-				Object:   &pod.ObjectMeta,
-				Owners:   pod.ObjectMeta.GetOwnerReferences(),
-			}
+			if !bkeContainer[container.Name] {
+				d := checks.Diagnostic{
+					Severity: checks.Warning,
+					Message:  fmt.Sprintf("Set resource requests and limits for container `%s` to prevent resource contention", container.Name),
+					Kind:     checks.Pod,
+					Object:   &pod.ObjectMeta,
+					Owners:   pod.ObjectMeta.GetOwnerReferences(),
+				}
 			diagnostics = append(diagnostics, d)
+			}
 		}
 	}
 	return diagnostics

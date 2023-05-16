@@ -1,5 +1,5 @@
 /*
-Copyright 2022 DigitalOcean
+Copyright 2022 bizflycloud
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ package basic
 
 import (
 	"fmt"
-
-	"github.com/digitalocean/clusterlint/checks"
-	"github.com/digitalocean/clusterlint/kube"
+	"strings"
+	"github.com/bizflycloud/clusterlint/checks"
+	"github.com/bizflycloud/clusterlint/kube"
 )
 
 func init() {
@@ -36,7 +36,7 @@ func (h *hostPathCheck) Name() string {
 
 // Groups returns a list of group names this check should be part of.
 func (h *hostPathCheck) Groups() []string {
-	return []string{"basic", "doks"}
+	return []string{"basic", "bke"}
 }
 
 // Description returns a detailed human-readable description of what this check
@@ -49,19 +49,26 @@ func (h *hostPathCheck) Description() string {
 // (low-priority problems) and errors (high-priority problems) as well as an
 // error value indicating that the check failed to run.
 func (h *hostPathCheck) Run(objects *kube.Objects) ([]checks.Diagnostic, error) {
+	bkePod := map[string]bool{
+		"csi-bizflycloud-nodeplugin": true,
+		"kube-router": true,
+	}
 	var diagnostics []checks.Diagnostic
 	for _, pod := range objects.Pods.Items {
 		for _, volume := range pod.Spec.Volumes {
-			pod := pod
-			if volume.VolumeSource.HostPath != nil {
-				d := checks.Diagnostic{
-					Severity: checks.Warning,
-					Message:  fmt.Sprintf("Avoid using hostpath for volume '%s'.", volume.Name),
-					Kind:     checks.Pod,
-					Object:   &pod.ObjectMeta,
-					Owners:   pod.ObjectMeta.GetOwnerReferences(),
+			index := strings.LastIndex(pod.Name, "-")
+			if !bkePod[pod.Name[:index]] {
+				pod := pod
+				if volume.VolumeSource.HostPath != nil {
+					d := checks.Diagnostic{
+						Severity: checks.Warning,
+						Message:  fmt.Sprintf("Avoid using hostpath for volume '%s'.", volume.Name),
+						Kind:     checks.Pod,
+						Object:   &pod.ObjectMeta,
+						Owners:   pod.ObjectMeta.GetOwnerReferences(),
+					}
+					diagnostics = append(diagnostics, d)
 				}
-				diagnostics = append(diagnostics, d)
 			}
 		}
 	}

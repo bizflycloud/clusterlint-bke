@@ -1,5 +1,5 @@
 /*
-Copyright 2022 DigitalOcean
+Copyright 2022 bizflycloud
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,13 +25,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/digitalocean/clusterlint/checks"
-	"github.com/digitalocean/clusterlint/kube"
+	"github.com/bizflycloud/clusterlint/checks"
+	"github.com/bizflycloud/clusterlint/kube"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
 
 	// Side-effect import to get all the checks registered.
-	_ "github.com/digitalocean/clusterlint/checks/all"
+	_ "github.com/bizflycloud/clusterlint/checks/all"
 )
 
 const delimiter = ":"

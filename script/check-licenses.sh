@@ -8,7 +8,7 @@ function list_go_files {
 }
 
 function has_license {
-    head -n2 "$1" | grep -q 'Copyright .... DigitalOcean'
+    head -n2 "$1" | grep -q 'Copyright .... bizflycloud'
 }
 
 ret=0

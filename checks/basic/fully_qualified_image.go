@@ -1,5 +1,5 @@
 /*
-Copyright 2022 DigitalOcean
+Copyright 2022 bizflycloud
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package basic
 import (
 	"fmt"
 
-	"github.com/digitalocean/clusterlint/checks"
-	"github.com/digitalocean/clusterlint/kube"
+	"github.com/bizflycloud/clusterlint/checks"
+	"github.com/bizflycloud/clusterlint/kube"
 	"github.com/docker/distribution/reference"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -68,6 +68,9 @@ func (fq *fullyQualifiedImageCheck) Run(objects *kube.Objects) ([]checks.Diagnos
 func (fq *fullyQualifiedImageCheck) checkImage(containers []corev1.Container, pod corev1.Pod) []checks.Diagnostic {
 	var diagnostics []checks.Diagnostic
 	for _, container := range containers {
+		bkeContainerImage := map[string]bool{
+			"coredns": true,
+		}
 		value, err := reference.ParseAnyReference(container.Image)
 		if err != nil {
 			d := checks.Diagnostic{
@@ -80,14 +83,16 @@ func (fq *fullyQualifiedImageCheck) checkImage(containers []corev1.Container, po
 			diagnostics = append(diagnostics, d)
 		} else {
 			if value.String() != container.Image {
-				d := checks.Diagnostic{
-					Severity: checks.Warning,
-					Message:  fmt.Sprintf("Use fully qualified image for container '%s'", container.Name),
-					Kind:     checks.Pod,
-					Object:   &pod.ObjectMeta,
-					Owners:   pod.ObjectMeta.GetOwnerReferences(),
+				if !bkeContainerImage[container.Name] {
+					d := checks.Diagnostic{
+						Severity: checks.Warning,
+						Message:  fmt.Sprintf("Use fully qualified image for container '%s'", container.Name),
+						Kind:     checks.Pod,
+						Object:   &pod.ObjectMeta,
+						Owners:   pod.ObjectMeta.GetOwnerReferences(),
+					}
+					diagnostics = append(diagnostics, d)
 				}
-				diagnostics = append(diagnostics, d)
 			}
 		}
 	}

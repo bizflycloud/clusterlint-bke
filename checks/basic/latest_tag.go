@@ -1,5 +1,5 @@
 /*
-Copyright 2022 DigitalOcean
+Copyright 2022 bizflycloud
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/digitalocean/clusterlint/checks"
-	"github.com/digitalocean/clusterlint/kube"
+	"github.com/bizflycloud/clusterlint/checks"
+	"github.com/bizflycloud/clusterlint/kube"
 	"github.com/docker/distribution/reference"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -64,6 +64,9 @@ func (l *latestTagCheck) Run(objects *kube.Objects) ([]checks.Diagnostic, error)
 // checkTags checks if the image name conforms to pattern `image:latest` or `image`
 // Adds a warning if it finds any image that uses the latest tag
 func (l *latestTagCheck) checkTags(containers []corev1.Container, pod corev1.Pod) []checks.Diagnostic {
+	bkeImage := map[string]bool{
+		"install-cni": true,
+	}
 	var diagnostics []checks.Diagnostic
 	for _, container := range containers {
 		namedRef, err := reference.ParseNormalizedNamed(container.Image)
@@ -80,14 +83,16 @@ func (l *latestTagCheck) checkTags(containers []corev1.Container, pod corev1.Pod
 		}
 		tagNameOnly := reference.TagNameOnly(namedRef)
 		if strings.HasSuffix(tagNameOnly.String(), ":latest") {
-			d := checks.Diagnostic{
-				Severity: checks.Warning,
-				Message:  fmt.Sprintf("Avoid using latest tag for container '%s'", container.Name),
-				Kind:     checks.Pod,
-				Object:   &pod.ObjectMeta,
-				Owners:   pod.ObjectMeta.GetOwnerReferences(),
+			if !bkeImage[container.Name] {
+				d := checks.Diagnostic{
+					Severity: checks.Warning,
+					Message:  fmt.Sprintf("Avoid using latest tag for container '%s'", container.Name),
+					Kind:     checks.Pod,
+					Object:   &pod.ObjectMeta,
+					Owners:   pod.ObjectMeta.GetOwnerReferences(),
+				}
+				diagnostics = append(diagnostics, d)
 			}
-			diagnostics = append(diagnostics, d)
 		}
 	}
 	return diagnostics

@@ -10,7 +10,7 @@ practice that is highly specific to a particular organization.
 Build the plugin as a Go plugin:
 
 ```console
-$ go build -buildmode=plugin github.com/digitalocean/clusterlint/example-plugin
+$ go build -buildmode=plugin github.com/bizflycloud/clusterlint/example-plugin
 ```
 
 You should end up with a file called `example-plugin.so` in your working
@@ -44,7 +44,7 @@ If the version used to build the plugin doesn't match the binary version you'll
 get a message like:
 
 ```
-plugin.Open("./example-plugin"): plugin was built with a different version of package github.com/digitalocean/clusterlint/kube
+plugin.Open("./example-plugin"): plugin was built with a different version of package github.com/bizflycloud/clusterlint/kube
 ```
 
 We recommend using go module versioning to ensure you're building your plugin

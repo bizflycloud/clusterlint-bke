@@ -1,5 +1,5 @@
 /*
-Copyright 2022 DigitalOcean
+Copyright 2022 bizflycloud
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
 
-//Identifier is used to identify a specific namspace scoped object.
+// Identifier is used to identify a specific namspace scoped object.
 type Identifier struct {
 	Name      string
 	Namespace string

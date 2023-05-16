@@ -1,5 +1,5 @@
 /*
-Copyright 2022 DigitalOcean
+Copyright 2022 bizflycloud
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package basic
 import (
 	"sync"
 
-	"github.com/digitalocean/clusterlint/checks"
-	"github.com/digitalocean/clusterlint/kube"
+	"github.com/bizflycloud/clusterlint/checks"
+	"github.com/bizflycloud/clusterlint/kube"
 	"golang.org/x/sync/errgroup"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -56,6 +56,10 @@ func (s *unusedSecretCheck) Description() string {
 // (low-priority problems) and errors (high-priority problems) as well as an
 // error value indicating that the check failed to run.
 func (s *unusedSecretCheck) Run(objects *kube.Objects) ([]checks.Diagnostic, error) {
+	bkeSecret := map[string]bool{
+		"kubernetes-dashboard-csrf": true,
+		"kubernetes-dashboard-key-holder": true,
+	}
 	var diagnostics []checks.Diagnostic
 	used, err := checkReferences(objects)
 	if err != nil {
@@ -64,21 +68,23 @@ func (s *unusedSecretCheck) Run(objects *kube.Objects) ([]checks.Diagnostic, err
 
 	for _, secret := range filter(objects.Secrets.Items) {
 		if _, ok := used[kube.Identifier{Name: secret.GetName(), Namespace: secret.GetNamespace()}]; !ok {
-			secret := secret
-			d := checks.Diagnostic{
-				Severity: checks.Warning,
-				Message:  "Unused secret",
-				Kind:     checks.Secret,
-				Object:   &secret.ObjectMeta,
-				Owners:   secret.ObjectMeta.GetOwnerReferences(),
+			if !bkeSecret[secret.GetName()] {
+				secret := secret
+				d := checks.Diagnostic{
+					Severity: checks.Warning,
+					Message:  "Unused secret",
+					Kind:     checks.Secret,
+					Object:   &secret.ObjectMeta,
+					Owners:   secret.ObjectMeta.GetOwnerReferences(),
+				}
+				diagnostics = append(diagnostics, d)
 			}
-			diagnostics = append(diagnostics, d)
 		}
 	}
 	return diagnostics, nil
 }
 
-//checkReferences checks each pod for config map references in volumes and environment variables
+// checkReferences checks each pod for config map references in volumes and environment variables
 func checkReferences(objects *kube.Objects) (map[kube.Identifier]struct{}, error) {
 	used := make(map[kube.Identifier]struct{})
 	var empty struct{}

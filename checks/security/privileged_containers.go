@@ -1,5 +1,5 @@
 /*
-Copyright 2022 DigitalOcean
+Copyright 2022 bizflycloud
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package security
 import (
 	"fmt"
 
-	"github.com/digitalocean/clusterlint/checks"
-	"github.com/digitalocean/clusterlint/kube"
+	"github.com/bizflycloud/clusterlint/checks"
+	"github.com/bizflycloud/clusterlint/kube"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -64,17 +64,24 @@ func (pc *privilegedContainerCheck) Run(objects *kube.Objects) ([]checks.Diagnos
 // Adds a warning if it finds any privileged container
 func (pc *privilegedContainerCheck) checkPrivileged(containers []corev1.Container, pod corev1.Pod) []checks.Diagnostic {
 	var diagnostics []checks.Diagnostic
+	bkeContainer := map[string]bool{
+		"bizflycloud-csi-plugin": true,
+		"kube-router": true,
+		"coredns": true,
+	}
 	for _, container := range containers {
-		if container.SecurityContext != nil && container.SecurityContext.Privileged != nil && *container.SecurityContext.Privileged {
-			d := checks.Diagnostic{
-				Severity: checks.Warning,
-				Message:  fmt.Sprintf("Privileged container '%s' found. Please ensure that the image is from a trusted source.", container.Name),
-				Kind:     checks.Pod,
-				Object:   &pod.ObjectMeta,
-				Owners:   pod.ObjectMeta.GetOwnerReferences(),
+		if container.SecurityContext != nil && container.SecurityContext.Privileged != nil && *container.SecurityContext.Privileged{
+			if !bkeContainer[container.Name] {
+				d := checks.Diagnostic{
+					Severity: checks.Warning,
+					Message:  fmt.Sprintf("Privileged container '%s' found. Please ensure that the image is from a trusted source.", container.Name),
+					Kind:     checks.Pod,
+					Object:   &pod.ObjectMeta,
+					Owners:   pod.ObjectMeta.GetOwnerReferences(),
+				}
+				diagnostics = append(diagnostics, d)
 			}
-			diagnostics = append(diagnostics, d)
-		}
+		}	
 	}
 	return diagnostics
 }

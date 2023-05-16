@@ -1,5 +1,5 @@
 /*
-Copyright 2022 DigitalOcean
+Copyright 2022 bizflycloud
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ package checks
 import (
 	"strings"
 
-	"github.com/digitalocean/clusterlint/kube"
+	"github.com/bizflycloud/clusterlint/kube"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const checkAnnotation = "clusterlint.digitalocean.com/disabled-checks"
+const checkAnnotation = "clusterlint.bizflycloud.com/disabled-checks"
 const separator = ","
 
 // Check is a check that can run on Kubernetes objects.

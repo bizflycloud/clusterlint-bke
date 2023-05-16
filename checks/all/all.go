@@ -1,5 +1,5 @@
 /*
-Copyright 2022 DigitalOcean
+Copyright 2022 bizflycloud
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@ package all
 
 import (
 	// Side-effect import to get all the checks in basic package registered.
-	_ "github.com/digitalocean/clusterlint/checks/basic"
+	_ "github.com/bizflycloud/clusterlint/checks/basic"
 	// Side-effect import to get all the checks in doks package registered.
-	_ "github.com/digitalocean/clusterlint/checks/doks"
+	_ "github.com/bizflycloud/clusterlint/checks/bke"
 	// Side-effect import to get all the checks in noop package registered.
-	_ "github.com/digitalocean/clusterlint/checks/noop"
+	_ "github.com/bizflycloud/clusterlint/checks/noop"
 	// Side-effect import to get all the checks in security package registered.
-	_ "github.com/digitalocean/clusterlint/checks/security"
+	_ "github.com/bizflycloud/clusterlint/checks/security"
 	// Side-effect import to get all the checks in containerd package registered.
-	_ "github.com/digitalocean/clusterlint/checks/containerd"
+	_ "github.com/bizflycloud/clusterlint/checks/containerd"
 )

@@ -1,5 +1,5 @@
 /*
-Copyright 2022 DigitalOcean
+Copyright 2022 bizflycloud
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package basic
 import (
 	"sync"
 
-	"github.com/digitalocean/clusterlint/checks"
-	"github.com/digitalocean/clusterlint/kube"
+	"github.com/bizflycloud/clusterlint/checks"
+	"github.com/bizflycloud/clusterlint/kube"
 	"golang.org/x/sync/errgroup"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -106,9 +106,14 @@ func (nc *defaultNamespaceCheck) checkPVCs(items *corev1.PersistentVolumeClaimLi
 
 // checkConfigMaps checks if there are config maps in the default namespace
 func (nc *defaultNamespaceCheck) checkConfigMaps(items *corev1.ConfigMapList, alert *alert) {
+	bkeConfigmap := map[string]bool{
+		"kube-root-ca.crt": true,
+	}
 	for _, item := range items.Items {
 		if corev1.NamespaceDefault == item.GetNamespace() {
-			alert.warn(checks.ConfigMap, item.ObjectMeta)
+			if !bkeConfigmap[item.GetName()] {
+				alert.warn(checks.ConfigMap, item.ObjectMeta)
+			}
 		}
 	}
 }

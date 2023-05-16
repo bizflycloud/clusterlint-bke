@@ -1,5 +1,5 @@
 /*
-Copyright 2022 DigitalOcean
+Copyright 2022 bizflycloud
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package security
 import (
 	"fmt"
 
-	"github.com/digitalocean/clusterlint/checks"
-	"github.com/digitalocean/clusterlint/kube"
+	"github.com/bizflycloud/clusterlint/checks"
+	"github.com/bizflycloud/clusterlint/kube"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -51,7 +51,13 @@ func (nr *nonRootUserCheck) Description() string {
 // error value indicating that the check failed to run.
 func (nr *nonRootUserCheck) Run(objects *kube.Objects) ([]checks.Diagnostic, error) {
 	var diagnostics []checks.Diagnostic
-
+	bkeContainer := map[string]bool{
+		"bizflycloud-csi-plugin": true,
+		"kube-router": true,
+		"coredns": true,
+		"node-driver-registrar": true,
+		"install-cni": true,
+	}
 	for _, pod := range objects.Pods.Items {
 		pod := pod
 		var containers []corev1.Container
@@ -63,17 +69,18 @@ func (nr *nonRootUserCheck) Run(objects *kube.Objects) ([]checks.Diagnostic, err
 			containerRunAsRoot := container.SecurityContext == nil || container.SecurityContext.RunAsNonRoot == nil || !*container.SecurityContext.RunAsNonRoot
 
 			if containerRunAsRoot && podRunAsRoot {
-				d := checks.Diagnostic{
-					Severity: checks.Warning,
-					Message:  fmt.Sprintf("Container `%s` can run as root user. Please ensure that the image is from a trusted source.", container.Name),
-					Kind:     checks.Pod,
-					Object:   &pod.ObjectMeta,
-					Owners:   pod.ObjectMeta.GetOwnerReferences(),
-				}
+				if !bkeContainer[container.Name] {
+					d := checks.Diagnostic{
+						Severity: checks.Warning,
+						Message:  fmt.Sprintf("Container `%s` can run as root user. Please ensure that the image is from a trusted source.", container.Name),
+						Kind:     checks.Pod,
+						Object:   &pod.ObjectMeta,
+						Owners:   pod.ObjectMeta.GetOwnerReferences(),
+					}
 				diagnostics = append(diagnostics, d)
+				}
 			}
 		}
 	}
-
 	return diagnostics, nil
 }
