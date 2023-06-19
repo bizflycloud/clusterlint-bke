@@ -1,4 +1,4 @@
-module github.com/digitalocean/clusterlint
+module github.com/bizflycloud/clusterlint
 
 go 1.19
 

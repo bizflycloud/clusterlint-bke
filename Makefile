@@ -1,5 +1,5 @@
 # Image URL to use all building/pushing image targets
-IMG ?= digitalocean/clusterlint
+IMG ?= bizflycloud/clusterlint
 TAG ?= dev
 
 # Build the docker image

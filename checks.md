@@ -1,4 +1,4 @@
-[Clusterlint](https://github.com/digitalocean/clusterlint) flags issues with workloads deployed in a cluster. These issues might cause workload downtime during maintenance or upgrade to a new Kubernetes version, and could complicate the maintenance or upgrade itself. DigitalOcean runs a cluster linter check before a cluster upgrade. You can also run these checks yourself from the **Operational Readiness Check** section of a cluster's **Overview** node.
+[Clusterlint](https://github.com/bizflycloud/clusterlint) flags issues with workloads deployed in a cluster. These issues might cause workload downtime during maintenance or upgrade to a new Kubernetes version, and could complicate the maintenance or upgrade itself. bizflycloud runs a cluster linter check before a cluster upgrade. You can also run these checks yourself from the **Operational Readiness Check** section of a cluster's **Overview** node.
 
 ## Default Namespace
 
@@ -202,7 +202,7 @@ On upgrade of a cluster on DOKS, the worker nodes' hostname changes. So, if your
 ### Example
 
 ```yaml
-# Not recommended: Using a raw DigitalOcean resource name in the nodeSelector
+# Not recommended: Using a raw bizflycloud resource name in the nodeSelector
 apiVersion: v1
 kind: Pod
 metadata:
@@ -232,7 +232,7 @@ spec:
   - name: nginx
     image: nginx
   nodeSelector:
-    doks.digitalocean.com/node-pool: pool-y25ag12r1
+    doks.bizflycloud.com/node-pool: pool-y25ag12r1
 ```
 
 ## Admission Controller Webhook
@@ -477,7 +477,7 @@ webhooks:
 - Name: `dobs-pod-owner`
 - Groups: `doks`
 
-This check ensures that any pod that references a DigitalOcean Block Storage Volume is owned by a StatefulSet. We want such pods to be owned by a StatefulSet because:
+This check ensures that any pod that references a bizflycloud Block Storage Volume is owned by a StatefulSet. We want such pods to be owned by a StatefulSet because:
 
 - The [Eviction API](https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/#eviction-api) does not respect deployment strategies. It only cares about pod disruption budgets (PDBs). So, if you do not set it right, you can end up with multiple volume-using pods running concurrently. This can lead to stuck deployments if they happen to come up on different nodes in the best case, and data corruption if they come up on the same node and end up writing to the same volume concurrently. For more context, see [Disruptions](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/) in the Kubernetes documentation.
 

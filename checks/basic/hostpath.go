@@ -49,25 +49,23 @@ func (h *hostPathCheck) Description() string {
 // (low-priority problems) and errors (high-priority problems) as well as an
 // error value indicating that the check failed to run.
 func (h *hostPathCheck) Run(objects *kube.Objects) ([]checks.Diagnostic, error) {
-	bkePod := map[string]bool{
-		"csi-bizflycloud-nodeplugin": true,
-		"kube-router": true,
-	}
+	bkePod := [...]string{"csi-bizflycloud-nodeplugin","kube-router"}
 	var diagnostics []checks.Diagnostic
 	for _, pod := range objects.Pods.Items {
-		for _, volume := range pod.Spec.Volumes {
-			index := strings.LastIndex(pod.Name, "-")
-			if !bkePod[pod.Name[:index]] {
-				pod := pod
-				if volume.VolumeSource.HostPath != nil {
-					d := checks.Diagnostic{
-						Severity: checks.Warning,
-						Message:  fmt.Sprintf("Avoid using hostpath for volume '%s'.", volume.Name),
-						Kind:     checks.Pod,
-						Object:   &pod.ObjectMeta,
-						Owners:   pod.ObjectMeta.GetOwnerReferences(),
+		for _,podName := range bkePod {
+			if strings.Contains(pod.Name, podName) {
+				for _, volume := range pod.Spec.Volumes {
+					pod := pod
+					if volume.VolumeSource.HostPath != nil {
+						d := checks.Diagnostic{
+							Severity: checks.Warning,
+							Message:  fmt.Sprintf("Avoid using hostpath for volume '%s'.", volume.Name),
+							Kind:     checks.Pod,
+							Object:   &pod.ObjectMeta,
+							Owners:   pod.ObjectMeta.GetOwnerReferences(),
+						}
+						diagnostics = append(diagnostics, d)
 					}
-					diagnostics = append(diagnostics, d)
 				}
 			}
 		}

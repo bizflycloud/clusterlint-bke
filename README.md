@@ -1,6 +1,6 @@
 # Clusterlint
 
-[![CircleCI](https://circleci.com/gh/digitalocean/clusterlint.svg?style=svg)](https://circleci.com/gh/digitalocean/clusterlint)
+[![CircleCI](https://circleci.com/gh/bizflycloud/clusterlint.svg?style=svg)](https://circleci.com/gh/bizflycloud/clusterlint)
 
 As clusters scale and become increasingly difficult to maintain, clusterlint helps operators conform to Kubernetes best practices around resources, security and reliability to avoid common problems while operating or upgrading the clusters.
 
@@ -20,14 +20,14 @@ While there are problems that are common to clusters irrespective of the environ
 
 Some examples of such checks are:
 
-- On upgrade of a cluster on [DOKS](https://www.digitalocean.com/products/kubernetes/), the worker nodes' hostname changes. So, if a user's pod spec relies on the hostname to schedule pods on specific nodes, pod scheduling will fail after upgrade.
+- On upgrade of a cluster on [DOKS](https://www.bizflycloud.com/products/kubernetes/), the worker nodes' hostname changes. So, if a user's pod spec relies on the hostname to schedule pods on specific nodes, pod scheduling will fail after upgrade.
 
-*Please refer to [checks.md](https://github.com/digitalocean/clusterlint/blob/master/checks.md) to get some background on every check that clusterlint performs.*
+*Please refer to [checks.md](https://github.com/bizflycloud/clusterlint/blob/master/checks.md) to get some background on every check that clusterlint performs.*
 
 ### Install
 
 ```bash
-go get github.com/digitalocean/clusterlint/cmd/clusterlint
+go get github.com/bizflycloud/clusterlint/cmd/clusterlint
 ```
 
 The above command creates the `clusterlint` binary in `$GOPATH/bin`
@@ -93,12 +93,12 @@ clusterlint run -C default-namespace // exclude default-namespace check
 
 ### Disabling checks via Annotations
 
-Clusterlint provides a way to ignore some special objects in the cluster from being checked. For example, resources in the kube-system namespace often use privileged containers. This can create a lot of noise in the output when a cluster operator is looking for feedback to improve the cluster configurations. In order to avoid such a situation where objects that are exempt from being checked, the annotation `clusterlint.digitalocean.com/disabled-checks` can be added in the resource configuration. The annotation takes in a comma separated list of check names that should be excluded while running clusterlint.
+Clusterlint provides a way to ignore some special objects in the cluster from being checked. For example, resources in the kube-system namespace often use privileged containers. This can create a lot of noise in the output when a cluster operator is looking for feedback to improve the cluster configurations. In order to avoid such a situation where objects that are exempt from being checked, the annotation `clusterlint.bizflycloud.com/disabled-checks` can be added in the resource configuration. The annotation takes in a comma separated list of check names that should be excluded while running clusterlint.
 
 ```json
 "metadata": {
   "annotations": {
-    "clusterlint.digitalocean.com/disabled-checks" : "noop,bare-pods"
+    "clusterlint.bizflycloud.com/disabled-checks" : "noop,bare-pods"
   }
 }
 ```
@@ -132,8 +132,8 @@ The workflow does the following:
 
 - Checks out the source code from the default branch
 - Login with dockerhub credentials specified as secrets
-- Builds the docker image digitalocean/clusterlint:<tag>
-- Pushes digitalocean/clusterlint:<tag> to dockerhub
+- Builds the docker image bizflycloud/clusterlint:<tag>
+- Pushes bizflycloud/clusterlint:<tag> to dockerhub
 - Builds binaries for all archs and computes sha256 sums for each binary
 - Creates release and tags the latest commit on the default branch with the input tag specified when workflow is triggered
 
@@ -144,7 +144,7 @@ see the [contribution guidelines](CONTRIBUTING.md) for details.
 
 ## License
 
-Copyright 2022 DigitalOcean
+Copyright 2022 bizflycloud
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
